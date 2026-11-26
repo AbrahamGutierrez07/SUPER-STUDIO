@@ -17,6 +17,8 @@ jobs:
           gradle-version: 8.11.1
       - run: npm install
       - run: npm run build
+      - run: rm -rf android
+      - run: npx cap add android
       - run: npx cap sync android
       - run: cd android && gradle assembleDebug
       - uses: actions/upload-artifact@v4
