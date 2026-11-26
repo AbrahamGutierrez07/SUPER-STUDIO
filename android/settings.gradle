@@ -1,0 +1,4 @@
+include ':app'
+rootProject.name = 'Super Studio'
+
+apply from: 'capacitor.settings.gradle'

@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Super Studio — Organización Académica Inteligente</title>
+
+  <!-- PWA & Mobile Meta Tags -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#090d16" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Super Studio" />
+  <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS & Lucide Icons & Tesseract OCR -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              dark: '#090d16',
+              card: '#111827',
+              surface: '#1a2234',
+              indigo: '#4f46e5',
+              violet: '#7c3aed',
+              cyan: '#06b6d4'
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    input, textarea, [contenteditable="true"] {
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.4); border-radius: 9999px; }
+
+    /* Safe Area insets for modern mobile screens */
+    .safe-top { padding-top: env(safe-area-inset-top, 0px); }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+  </style>
+</head>
+<body class="bg-slate-100 dark:bg-brand-dark text-slate-900 dark:text-slate-100 min-h-screen flex justify-center selection:bg-indigo-500 selection:text-white">
+
+  <!-- Contenedor Principal Adaptable (Mobile-First y Desktop Centrado) -->
+  <div id="app-shell" class="w-full max-w-md min-h-screen bg-white dark:bg-brand-dark shadow-2xl flex flex-col relative overflow-x-hidden border-x border-slate-200 dark:border-slate-800/80">
+
+    <!-- ==================== BANNER DE INSTALACIÓN PWA ==================== -->
+    <div id="pwa-install-banner" class="hidden px-4 py-2.5 bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-700 text-white flex items-center justify-between text-xs font-semibold shadow-md z-40 transition-all">
+      <div class="flex items-center gap-2">
+        <img src="/logo-super-studio.png" class="w-7 h-7 rounded-lg shadow-sm border border-white/20" alt="Super Studio" />
+        <div>
+          <p class="font-bold leading-tight">Super Studio</p>
+          <p class="text-[10px] text-indigo-200">Instálalo en tu PC o Teléfono</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <button id="btn-banner-install" class="px-3 py-1.5 rounded-xl bg-white text-indigo-700 font-extrabold text-[11px] hover:bg-indigo-50 shadow transition">
+          Instalar App
+        </button>
+        <button id="btn-banner-dismiss" class="p-1 text-white/70 hover:text-white transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== ONBOARDING / REGISTRO INICIAL ==================== -->
+    <section id="onboarding-screen" class="flex-1 flex flex-col justify-between p-6 overflow-y-auto safe-top safe-bottom">
+      <div class="text-center mt-2">
+        <div class="w-20 h-20 mx-auto rounded-2xl shadow-xl shadow-indigo-500/25 overflow-hidden mb-3.5 border border-indigo-500/30">
+          <img src="/logo-super-studio.png" alt="Super Studio Logo" class="w-full h-full object-cover" />
+        </div>
+        <h1 class="text-2xl font-black tracking-tight bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-400 bg-clip-text text-transparent">Super Studio</h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto">Ingresa tus datos académicos para habilitar tu espacio personal totalmente limpio.</p>
+      </div>
+
+      <form id="onboarding-form" class="space-y-4 my-5">
+        <!-- Foto de Perfil -->
+        <div class="bg-slate-50 dark:bg-brand-card border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 flex items-center gap-4">
+          <div id="ob-avatar-preview" class="w-16 h-16 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-xl shrink-0 overflow-hidden border-2 border-indigo-400/50 shadow-inner">
+            <i data-lucide="camera" class="w-6 h-6"></i>
+          </div>
+          <div class="flex-1">
+            <p class="text-xs font-semibold mb-1.5">Foto de perfil</p>
+            <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600/15 text-indigo-500 dark:text-indigo-300 text-xs font-semibold cursor-pointer hover:bg-indigo-600/25 transition">
+              <i data-lucide="image-plus" class="w-3.5 h-3.5"></i>
+              <span>Elegir de galería</span>
+              <input type="file" id="ob-photo-input" accept="image/*" class="hidden" />
+            </label>
+            <div class="flex items-center gap-2 mt-2">
+              <button type="button" data-color="#4f46e5" class="ob-color-btn w-5 h-5 rounded-full bg-indigo-600 ring-2 ring-offset-2 ring-offset-brand-card ring-indigo-400"></button>
+              <button type="button" data-color="#0284c7" class="ob-color-btn w-5 h-5 rounded-full bg-sky-600"></button>
+              <button type="button" data-color="#7c3aed" class="ob-color-btn w-5 h-5 rounded-full bg-violet-600"></button>
+              <button type="button" data-color="#059669" class="ob-color-btn w-5 h-5 rounded-full bg-emerald-600"></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nombre completo (Completamente vacío) -->
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Nombre completo *</label>
+          <input type="text" id="ob-name" required placeholder="Nombre completo" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-brand-card border border-slate-200 dark:border-slate-800 text-sm focus:outline-none focus:border-indigo-500 transition" />
+        </div>
+
+        <!-- Tipo de institución -->
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Tipo de institución *</label>
+          <div class="grid grid-cols-2 gap-2 p-1 rounded-xl bg-slate-100 dark:bg-brand-card border border-slate-200 dark:border-slate-800">
+            <button type="button" id="btn-type-uni" class="py-2 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow">Universidad</button>
+            <button type="button" id="btn-type-col" class="py-2 rounded-lg text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-200 transition">Colegio</button>
+          </div>
+          <input type="hidden" id="ob-inst-type" value="Universidad" />
+        </div>
+
+        <!-- Nombre de la institución (Completamente vacío) -->
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Universidad o colegio *</label>
+          <input type="text" id="ob-inst-name" required placeholder="Nombre de la universidad o colegio" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-brand-card border border-slate-200 dark:border-slate-800 text-sm focus:outline-none focus:border-indigo-500 transition" />
+        </div>
+
+        <!-- Carrera y Semestre alineados horizontalmente al mismo nivel con etiquetas en una sola línea -->
+        <div class="grid grid-cols-2 gap-3 items-end">
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5 whitespace-nowrap">CARRERA O GRADO *</label>
+            <input type="text" id="ob-career" required placeholder="Carrera o grado" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-brand-card border border-slate-200 dark:border-slate-800 text-sm focus:outline-none focus:border-indigo-500 transition" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5 whitespace-nowrap">SEMESTRE O PERIODO *</label>
+            <input type="text" id="ob-semester" required placeholder="Semestre o periodo" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-brand-card border border-slate-200 dark:border-slate-800 text-sm focus:outline-none focus:border-indigo-500 transition" />
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-600 text-white font-extrabold text-sm shadow-lg shadow-indigo-600/30 hover:opacity-95 transition flex items-center justify-center gap-2 mt-2">
+          <span>Ingresar a Super Studio</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </form>
+
+      <div class="text-center pb-2">
+        <p class="text-[11px] text-slate-500">Super Studio v1.0.0 • 100% Offline-First</p>
+      </div>
+    </section>
+
+    <!-- ==================== APLICACIÓN PRINCIPAL ==================== -->
+    <div id="main-app" class="hidden flex-1 flex flex-col h-screen overflow-hidden safe-top">
+
+      <!-- Header Superior -->
+      <header class="px-4 py-3 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between bg-white/95 dark:bg-brand-dark/95 backdrop-blur-md shrink-0 z-20">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl overflow-hidden shadow border border-indigo-500/20 shrink-0">
+            <img src="/logo-super-studio.png" alt="Super Studio" class="w-full h-full object-cover" />
+          </div>
+          <div>
+            <h2 class="text-sm font-extrabold leading-tight">Super Studio</h2>
+            <p id="header-subtitle" class="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[150px] sm:max-w-[190px]"></p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <!-- Botón de Instalación Universal PWA / Desktop -->
+          <button id="btn-header-install" class="hidden px-2.5 py-1.5 rounded-xl bg-indigo-600/15 text-indigo-400 hover:bg-indigo-600/25 border border-indigo-500/30 text-[11px] font-bold items-center gap-1 transition" title="Instalar aplicación en PC o Móvil">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Instalar</span>
+          </button>
+
+          <button id="open-settings-btn" class="p-2 rounded-xl bg-slate-100 dark:bg-brand-card text-slate-600 dark:text-slate-300 hover:text-indigo-500 transition" title="Perfil y Ajustes">
+            <i data-lucide="settings" class="w-4 h-4"></i>
+          </button>
+          <button id="open-profile-btn" class="w-9 h-9 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center overflow-hidden border border-indigo-400/50 shadow"></button>
+        </div>
+      </header>
+
+      <!-- Contenedor Principal de Vistas -->
+      <main class="flex-1 overflow-y-auto p-4 pb-24 space-y-4">
+
+        <!-- ==================== MÓDULO 1: HORARIO INTELIGENTE ==================== -->
+        <div id="tab-schedule" class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-base font-extrabold">Horario Académico</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Escanea tu horario o agrega clases</p>
+            </div>
+            <label class="flex items-center gap-1.5 text-[11px] font-semibold bg-slate-100 dark:bg-brand-card px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 cursor-pointer">
+              <i data-lucide="bell" class="w-3.5 h-3.5 text-indigo-500"></i>
+              <span>Alertas</span>
+              <input type="checkbox" id="global-notif-toggle" checked class="accent-indigo-600 ml-1" />
+            </label>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <label class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-xs font-bold shadow cursor-pointer hover:opacity-95 transition">
+              <i data-lucide="scan-line" class="w-4 h-4"></i>
+              <span>Escanear Foto/PDF</span>
+              <input type="file" id="schedule-file-input" accept="image/*,.pdf" class="hidden" />
+            </label>
+            <button id="btn-add-class-modal" class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-slate-100 dark:bg-brand-card border border-slate-200 dark:border-slate-800 text-xs font-bold hover:border-indigo-500 transition">
+              <i data-lucide="plus" class="w-4 h-4 text-indigo-500"></i>
+              <span>Agregar Clase</span>
+            </button>
+          </div>
+
+          <!-- Estado de Escaneo OCR -->
+          <div id="ocr-status-box" class="hidden p-3.5 rounded-2xl bg-indigo-600/10 border border-indigo-500/30 text-xs space-y-2">
+            <div class="flex items-center gap-2 font-bold text-indigo-400">
+              <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
+              <span id="ocr-status-text">Analizando documento con OCR y replicando horario...</span>
+            </div>
+          </div>
+
+          <!-- Vista Previa del Documento Subido -->
+          <div id="uploaded-doc-preview" class="hidden p-3 rounded-2xl bg-slate-50 dark:bg-brand-card border border-slate-200 dark:border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-indigo-400 flex items-center gap-1"><i data-lucide="file-check" class="w-3.5 h-3.5"></i> Documento cargado como referencia</span>
+              <button id="close-doc-preview" class="text-[11px] text-slate-400 hover:text-rose-400">Ocultar</button>
+            </div>
+            <img id="doc-preview-img" class="hidden w-full max-h-40 object-contain rounded-xl bg-black/30" />
+            <p id="doc-preview-name" class="text-xs text-slate-400 truncate"></p>
+          </div>
+
+          <!-- Cuadrícula Semanal del Horario -->
+          <div id="schedule-empty" class="text-center py-12 px-4 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800">
+            <i data-lucide="calendar-days" class="w-10 h-10 mx-auto text-slate-400 mb-2"></i>
+            <p class="text-sm font-bold">Tu horario está vacío</p>
+            <p class="text-xs text-slate-500 mt-1">Sube una imagen o PDF de tu horario para replicarlo automáticamente o agrega tus asignaturas manualmente.</p>
+          </div>
+
+          <div id="schedule-grid-wrapper" class="hidden space-y-3">
+            <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead class="bg-slate-100 dark:bg-brand-card text-[11px] uppercase text-slate-500 dark:text-slate-400">
+                  <tr>
+                    <th class="p-2.5 border-b border-slate-200 dark:border-slate-800">Día</th>
+                    <th class="p-2.5 border-b border-slate-200 dark:border-slate-800">Hora</th>
+                    <th class="p-2.5 border-b border-slate-200 dark:border-slate-800">Asignatura</th>
+                    <th class="p-2.5 border-b border-slate-200 dark:border-slate-800">Salón</th>
+                    <th class="p-2.5 border-b border-slate-200 dark:border-slate-800 text-right">Acción</th>
+                  </tr>
+                </thead>
+                <tbody id="schedule-table-body" class="divide-y divide-slate-200 dark:divide-slate-800"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== MÓDULO 2: CALCULADORA DE NOTAS ==================== -->
+        <div id="tab-grades" class="hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-base font-extrabold">Notas y Remontadas</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Cortes y sub-ítems de evaluación</p>
+            </div>
+            <button id="btn-new-subject" class="px-3 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold flex items-center gap-1.5 shadow">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>Nueva Materia</span>
+            </button>
+          </div>
+
+          <div id="grades-empty" class="text-center py-12 px-4 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800">
+            <i data-lucide="graduation-cap" class="w-10 h-10 mx-auto text-slate-400 mb-2"></i>
+            <p class="text-sm font-bold">Sin asignaturas registradas</p>
+            <p class="text-xs text-slate-500 mt-1">Crea una materia, define los porcentajes de tus cortes y agrega parciales, talleres o quices.</p>
+          </div>
+
+          <div id="subjects-list" class="space-y-3"></div>
+        </div>
+
+        <!-- ==================== MÓDULO 3: PRESUPUESTO GENERAL ==================== -->
+        <div id="tab-budget" class="hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-base font-extrabold">Bolsillo Estudiantil</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Organiza tu presupuesto y gastos</p>
+            </div>
+            <button id="btn-set-budget" class="px-3 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold flex items-center gap-1.5">
+              <i data-lucide="wallet" class="w-3.5 h-3.5"></i>
+              <span>Presupuesto</span>
+            </button>
+          </div>
+
+          <!-- Resumen General -->
+          <div class="p-4 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-700 text-white shadow-lg space-y-3">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-[11px] uppercase tracking-wider opacity-80">Saldo Disponible</p>
+                <p id="budget-remaining" class="text-2xl font-extrabold mt-0.5">$0</p>
+              </div>
+              <span id="budget-total-badge" class="text-[11px] bg-white/20 px-2.5 py-1 rounded-full font-semibold">Total: $0</span>
+            </div>
+            <div class="w-full bg-black/25 h-2 rounded-full overflow-hidden">
+              <div id="budget-progress-bar" class="bg-cyan-300 h-full transition-all" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Sobres / Categorías -->
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Sobres / Categorías</h4>
+            <div class="flex gap-2">
+              <button id="btn-add-envelope" class="text-xs font-bold text-indigo-500 hover:underline">+ Sobre</button>
+              <button id="btn-add-expense" class="text-xs font-bold text-emerald-500 hover:underline">+ Gasto</button>
+            </div>
+          </div>
+          <div id="envelopes-list" class="grid grid-cols-2 gap-2.5"></div>
+
+          <!-- Historial de Gastos -->
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Historial de Gastos</h4>
+            <div id="expenses-list" class="space-y-2"></div>
+          </div>
+        </div>
+
+        <!-- ==================== MÓDULO 4: SALA GRUPAL GLOBAL POR ID ==================== -->
+        <div id="tab-group" class="hidden space-y-4">
+          <div id="group-lobby" class="space-y-4">
+            <div>
+              <h3 class="text-base font-extrabold">Salas de Estudio por ID</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Conéctate con tu equipo desde cualquier red</p>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-brand-card border border-slate-200 dark:border-slate-800 space-y-3">
+              <label class="block text-xs font-bold">Unirse o crear sala con ID único</label>
+              <div class="flex gap-2">
+                <input type="text" id="room-id-input" placeholder="Ej. SALA-101" class="flex-1 px-3 py-2.5 rounded-xl bg-white dark:bg-brand-dark border border-slate-200 dark:border-slate-700 text-sm uppercase font-bold focus:outline-none focus:border-indigo-500" />
+                <button id="btn-join-room" class="px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition">Entrar</button>
+              </div>
+              <button id="btn-generate-room" class="w-full py-2 rounded-xl bg-indigo-600/15 text-indigo-400 text-xs font-bold hover:bg-indigo-600/25 transition">Generar nuevo ID aleatorio</button>
+            </div>
+          </div>
+
+          <div id="group-active-room" class="hidden space-y-3">
+            <div class="p-3 rounded-2xl bg-slate-50 dark:bg-brand-card border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] uppercase font-bold text-emerald-400">● Conectado en vivo</span>
+                <h4 id="active-room-title" class="text-sm font-extrabold"></h4>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button id="btn-toggle-voice" class="px-2.5 py-1.5 rounded-xl bg-emerald-600/20 text-emerald-400 text-xs font-bold flex items-center gap-1">
+                  <i data-lucide="mic" class="w-3.5 h-3.5"></i>
+                  <span id="voice-status-label">Voz Off</span>
+                </button>
+                <button id="btn-leave-room" class="p-1.5 rounded-xl bg-rose-500/15 text-rose-400 text-xs font-bold">Salir</button>
+              </div>
+            </div>
+
+            <!-- Compartir Archivos en Sala -->
+            <div class="flex items-center justify-between px-1">
+              <span class="text-[11px] font-bold text-slate-400">Chat y Recursos del Grupo</span>
+              <label class="text-xs font-bold text-indigo-400 cursor-pointer flex items-center gap-1">
+                <i data-lucide="paperclip" class="w-3.5 h-3.5"></i> Subir Archivo
+                <input type="file" id="room-file-input" class="hidden" />
+              </label>
+            </div>
+
+            <!-- Mensajes -->
+            <div id="room-messages" class="h-64 overflow-y-auto p-3 rounded-2xl bg-slate-50 dark:bg-brand-card border border-slate-200 dark:border-slate-800 space-y-2.5"></div>
+
+            <!-- Enviar Mensaje -->
+            <form id="room-chat-form" class="flex gap-2">
+              <input type="text" id="room-msg-input" placeholder="Escribe un mensaje al grupo..." class="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-brand-card border border-slate-200 dark:border-slate-800 text-xs focus:outline-none focus:border-indigo-500" />
+              <button type="submit" class="px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-bold">Enviar</button>
+            </form>
+          </div>
+        </div>
+      </main>
+
+      <!-- Barra de Navegación Inferior -->
+      <nav class="fixed bottom-0 w-full max-w-md bg-white/95 dark:bg-brand-card/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 grid grid-cols-4 py-2 px-1 z-30 safe-bottom">
+        <button data-tab="schedule" class="nav-btn flex flex-col items-center gap-1 py-1 text-indigo-500 font-bold">
+          <i data-lucide="calendar" class="w-5 h-5"></i>
+          <span class="text-[10px]">Horario</span>
+        </button>
+        <button data-tab="grades" class="nav-btn flex flex-col items-center gap-1 py-1 text-slate-400">
+          <i data-lucide="calculator" class="w-5 h-5"></i>
+          <span class="text-[10px]">Notas</span>
+        </button>
+        <button data-tab="budget" class="nav-btn flex flex-col items-center gap-1 py-1 text-slate-400">
+          <i data-lucide="wallet" class="w-5 h-5"></i>
+          <span class="text-[10px]">Bolsillo</span>
+        </button>
+        <button data-tab="group" class="nav-btn flex flex-col items-center gap-1 py-1 text-slate-400">
+          <i data-lucide="users" class="w-5 h-5"></i>
+          <span class="text-[10px]">Parche ID</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- ==================== MODAL PERFIL, AJUSTES Y LEGAL ==================== -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-3">
+      <div class="w-full max-w-md bg-white dark:bg-brand-card rounded-3xl border border-slate-200 dark:border-slate-800 max-h-[90vh] flex flex-col overflow-hidden">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-sm">Super Studio</span>
+          </div>
+          <button id="close-settings-modal" class="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-white transition">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Tabs del Modal -->
+        <div class="grid grid-cols-3 gap-1 p-1.5 mx-4 mt-3 rounded-xl bg-slate-100 dark:bg-brand-dark text-xs font-bold">
+          <button data-modal-tab="profile" class="modal-tab-btn py-2 rounded-lg bg-indigo-600 text-white">Mi Perfil</button>
+          <button data-modal-tab="prefs" class="modal-tab-btn py-2 rounded-lg text-slate-400">Ajustes</button>
+          <button data-modal-tab="legal" class="modal-tab-btn py-2 rounded-lg text-slate-400">Legal y App</button>
+        </div>
+
+        <div class="p-4 overflow-y-auto space-y-4">
+          <!-- Tab Perfil -->
+          <div id="modal-pane-profile" class="space-y-3">
+            <div class="flex items-center gap-3">
+              <div id="edit-avatar-preview" class="w-14 h-14 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center overflow-hidden border border-indigo-400/50"></div>
+              <label class="px-3 py-1.5 rounded-xl bg-indigo-600/15 text-indigo-400 text-xs font-bold cursor-pointer hover:bg-indigo-600/25 transition">
+                Cambiar foto
+                <input type="file" id="edit-photo-input" accept="image/*" class="hidden" />
+              </label>
+            </div>
+            <div>
+              <label class="text-[11px] font-bold text-slate-400">Nombre completo</label>
+              <input type="text" id="edit-name" class="w-full mt-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-brand-dark border border-slate-200 dark:border-slate-800 text-xs focus:outline-none focus:border-indigo-500" />
+            </div>
+            <div>
+              <label class="text-[11px] font-bold text-slate-400">Institución</label>
+              <input type="text" id="edit-inst" class="w-full mt-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-brand-dark border border-slate-200 dark:border-slate-800 text-xs focus:outline-none focus:border-indigo-500" />
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="text-[11px] font-bold text-slate-400">Carrera o grado</label>
+                <input type="text" id="edit-career" class="w-full mt-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-brand-dark border border-slate-200 dark:border-slate-800 text-xs focus:outline-none focus:border-indigo-500" />
+              </div>
+              <div>
+                <label class="text-[11px] font-bold text-slate-400">Semestre o periodo</label>
+                <input type="text" id="edit-semester" class="w-full mt-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-brand-dark border border-slate-200 dark:border-slate-800 text-xs focus:outline-none focus:border-indigo-500" />
+              </div>
+            </div>
+            <button id="save-profile-btn" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow transition">Guardar Cambios</button>
+          </div>
+
+          <!-- Tab Ajustes -->
+          <div id="modal-pane-prefs" class="hidden space-y-3 text-xs">
+            <div class="p-3 rounded-2xl bg-slate-50 dark:bg-brand-dark flex items-center justify-between">
+              <span class="font-bold">Modo Oscuro</span>
+              <input type="checkbox" id="toggle-dark-mode" checked class="accent-indigo-600 w-4 h-4 cursor-pointer" />
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-50 dark:bg-brand-dark space-y-1.5">
+              <label class="font-bold block">Escala de Calificación</label>
+              <select id="grade-scale-select" class="w-full p-2 rounded-xl bg-white dark:bg-brand-card border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500">
+                <option value="5">0.0 a 5.0 (Aprueba en 3.0)</option>
+                <option value="100">0 a 100 (Aprueba en 60)</option>
+              </select>
+            </div>
+            <button id="btn-export-json" class="w-full py-2.5 rounded-xl bg-slate-100 dark:bg-brand-dark font-bold hover:bg-slate-200 dark:hover:bg-slate-800 transition">Exportar copia de seguridad (JSON)</button>
+            <button id="btn-reset-app" class="w-full py-2.5 rounded-xl bg-rose-500/15 text-rose-400 font-bold hover:bg-rose-500/25 transition">Restablecer toda la aplicación</button>
+          </div>
+
+          <!-- Tab Legal y App -->
+          <div id="modal-pane-legal" class="hidden space-y-3">
+            <div class="p-5 rounded-2xl bg-slate-50 dark:bg-brand-dark border border-slate-200 dark:border-slate-800 text-center space-y-2">
+              <div class="w-16 h-16 mx-auto rounded-2xl overflow-hidden shadow-lg border border-indigo-500/30">
+                <img src="/logo-super-studio.png" alt="Super Studio Logo Oficial" class="w-full h-full object-cover" />
+              </div>
+              <h4 class="font-extrabold text-sm">Super Studio v1.0.0</h4>
+              <p class="text-xs text-slate-400">Organización Académica Inteligente</p>
+            </div>
+
+            <details class="p-3 rounded-2xl bg-slate-50 dark:bg-brand-dark border border-slate-200 dark:border-slate-800 text-xs">
+              <summary class="font-bold cursor-pointer">Términos y Condiciones</summary>
+              <p class="mt-2 text-slate-400 leading-relaxed">Super Studio es una herramienta de apoyo académico personal y colaborativo. Los cálculos de notas y presupuestos son orientativos según los datos ingresados por cada estudiante.</p>
+            </details>
+
+            <details class="p-3 rounded-2xl bg-slate-50 dark:bg-brand-dark border border-slate-200 dark:border-slate-800 text-xs">
+              <summary class="font-bold cursor-pointer">Política de Privacidad</summary>
+              <p class="mt-2 text-slate-400 leading-relaxed">Tus horarios, calificaciones y registros financieros se almacenan localmente en tu dispositivo. Solo los mensajes y archivos enviados voluntariamente a una Sala por ID se comparten con los miembros de dicha sala.</p>
+            </details>
+
+            <details open class="p-3 rounded-2xl bg-slate-50 dark:bg-brand-dark border border-slate-200 dark:border-slate-800 text-xs">
+              <summary class="font-bold cursor-pointer text-indigo-400">Derechos de Autor</summary>
+              <p class="mt-2 text-slate-300 leading-relaxed">Desarrollado y creado por <strong class="text-white font-bold">Abraham Elías Gutiérrez Pardo</strong>. Todos los derechos reservados © 2026.</p>
+            </details>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Agregar / Editar Clase -->
+    <div id="class-modal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+      <form id="class-form" class="w-full max-w-sm bg-white dark:bg-brand-card rounded-3xl p-5 border border-slate-200 dark:border-slate-800 space-y-3">
+        <h4 class="font-extrabold text-sm">Clase en Horario</h4>
+        <input type="hidden" id="class-edit-index" value="-1" />
+        <input type="text" id="class-name" required placeholder="Nombre de la asignatura" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-brand-dark border border-slate-200 dark:border-slate-800 text-xs focus:outline-none focus:border-indigo-500" />
+        <div class="grid grid-cols-2 gap-2">
+          <select id="class-day" class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-brand-dark border border-slate-200 dark:border-slate-800 text-xs focus:outline-none focus:border-indigo-500">
+            <option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option>
+          </select>
+          <input type="text" id="class-time" required placeholder="Hora (ej. 08:00 - 10:00)" class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-brand-dark border border-slate-200 dark:border-slate-800 text-xs focus:outline-none focus:border-indigo-500" />
+        </div>
+        <input type="text" id="class-room" placeholder="Salón / Bloque" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-brand-dark border border-slate-200 dark:border-slate-800 text-xs focus:outline-none focus:border-indigo-500" />
+        <div class="flex gap-2 pt-1">
+          <button type="button" id="close-class-modal" class="flex-1 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition">Cancelar</button>
+          <button type="submit" class="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition">Guardar</button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+
+  <script>
+    // =========================================================================
+    // REGISTRO DE SERVICE WORKER & INSTALACIÓN PWA (PC & MÓVIL)
+    // =========================================================================
+    let deferredPrompt = null;
+    const headerInstallBtn = document.getElementById('btn-header-install');
+    const pwaInstallBanner = document.getElementById('pwa-install-banner');
+    const bannerInstallBtn = document.getElementById('btn-banner-install');
+    const bannerDismissBtn = document.getElementById('btn-banner-dismiss');
+
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('[PWA] Service Worker registrado con éxito:', reg.scope))
+          .catch(err => console.log('[PWA] Service Worker fallo al registrar:', err));
+      });
+    }
+
+    // Intercept PWA Install Prompt
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (headerInstallBtn) headerInstallBtn.classList.remove('hidden');
+      if (pwaInstallBanner && !sessionStorage.getItem('pwa_banner_dismissed')) {
+        pwaInstallBanner.classList.remove('hidden');
+      }
+    });
+
+    async function triggerPwaInstall() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log('[PWA] Resultado de instalación:', outcome);
+        deferredPrompt = null;
+        if (headerInstallBtn) headerInstallBtn.classList.add('hidden');
+        if (pwaInstallBanner) pwaInstallBanner.classList.add('hidden');
+      } else {
+        // Fallback info for iOS / already installed
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+          alert('Para instalar Super Studio en tu iPhone/iPad: Toca el botón "Compartir" de Safari y selecciona "Agregar a Inicio".');
+        } else {
+          alert('Para instalar Super Studio: Abre el menú de tu navegador (Chrome, Edge o Brave) y haz clic en "Instalar Super Studio" o "Crear acceso directo".');
+        }
+      }
+    }
+
+    if (headerInstallBtn) headerInstallBtn.addEventListener('click', triggerPwaInstall);
+    if (bannerInstallBtn) bannerInstallBtn.addEventListener('click', triggerPwaInstall);
+    if (bannerDismissBtn) {
+      bannerDismissBtn.addEventListener('click', () => {
+        pwaInstallBanner.classList.add('hidden');
+        sessionStorage.setItem('pwa_banner_dismissed', 'true');
+      });
+    }
+
+    window.addEventListener('appinstalled', () => {
+      console.log('[PWA] Super Studio instalada correctamente.');
+      if (headerInstallBtn) headerInstallBtn.classList.add('hidden');
+      if (pwaInstallBanner) pwaInstallBanner.classList.add('hidden');
+    });
+
+    // =========================================================================
+    // ESTADO GENERAL & PERSISTENCIA LOCAL
+    // =========================================================================
+    const STATE_KEY = 'super_studio_v1';
+    let state = JSON.parse(localStorage.getItem(STATE_KEY)) || {
+      profile: null,
+      settings: { dark: true, scale: 5, notifications: true },
+      schedule: [],
+      subjects: [],
+      budget: { total: 0, envelopes: [], expenses: [] },
+      room: { id: '', messages: [] }
+    };
+
+    let tempPhotoData = '';
+    let selectedAvatarColor = '#4f46e5';
+
+    function saveState() {
+      localStorage.setItem(STATE_KEY, JSON.stringify(state));
+    }
+
+    function renderAvatar(el, profile) {
+      if (!el) return;
+      if (profile && profile.photo) {
+        el.innerHTML = `<img src="${profile.photo}" class="w-full h-full object-cover" />`;
+      } else {
+        const initials = (profile?.name || 'SS').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+        el.style.backgroundColor = profile?.color || '#4f46e5';
+        el.textContent = initials;
+      }
+    }
+
+    // =========================================================================
+    // ONBOARDING (REGISTRO INICIAL VACÍO)
+    // =========================================================================
+    document.querySelectorAll('.ob-color-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedAvatarColor = btn.dataset.color;
+        tempPhotoData = '';
+        const prev = document.getElementById('ob-avatar-preview');
+        prev.style.backgroundColor = selectedAvatarColor;
+        prev.innerHTML = '<i data-lucide="camera" class="w-6 h-6"></i>';
+        lucide.createIcons();
+      });
+    });
+
+    document.getElementById('ob-photo-input').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        tempPhotoData = ev.target.result;
+        document.getElementById('ob-avatar-preview').innerHTML = `<img src="${tempPhotoData}" class="w-full h-full object-cover" />`;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('btn-type-uni').addEventListener('click', () => {
+      document.getElementById('ob-inst-type').value = 'Universidad';
+      document.getElementById('btn-type-uni').className = 'py-2 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow';
+      document.getElementById('btn-type-col').className = 'py-2 rounded-lg text-xs font-bold text-slate-500 dark:text-slate-400';
+    });
+
+    document.getElementById('btn-type-col').addEventListener('click', () => {
+      document.getElementById('ob-inst-type').value = 'Colegio';
+      document.getElementById('btn-type-col').className = 'py-2 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow';
+      document.getElementById('btn-type-uni').className = 'py-2 rounded-lg text-xs font-bold text-slate-500 dark:text-slate-400';
+    });
+
+    document.getElementById('onboarding-form').addEventListener('submit', e => {
+      e.preventDefault();
+      state.profile = {
+        name: document.getElementById('ob-name').value.trim(),
+        type: document.getElementById('ob-inst-type').value,
+        institution: document.getElementById('ob-inst-name').value.trim(),
+        career: document.getElementById('ob-career').value.trim(),
+        semester: document.getElementById('ob-semester').value.trim(),
+        photo: tempPhotoData,
+        color: selectedAvatarColor
+      };
+      saveState();
+      bootApp();
+    });
+
+    function bootApp() {
+      if (!state.profile) return;
+      document.getElementById('onboarding-screen').classList.add('hidden');
+      document.getElementById('main-app').classList.remove('hidden');
+      document.getElementById('header-subtitle').textContent = `${state.profile.career} • ${state.profile.semester}`;
+      renderAvatar(document.getElementById('open-profile-btn'), state.profile);
+      renderSchedule();
+      renderSubjects();
+      renderBudget();
+      lucide.createIcons();
+    }
+
+    // =========================================================================
+    // NAVEGACIÓN INFERIOR (TABS)
+    // =========================================================================
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.tab;
+        ['schedule', 'grades', 'budget', 'group'].forEach(t => {
+          document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== target);
+        });
+        document.querySelectorAll('.nav-btn').forEach(b => {
+          b.classList.toggle('text-indigo-500', b === btn);
+          b.classList.toggle('font-bold', b === btn);
+          b.classList.toggle('text-slate-400', b !== btn);
+        });
+      });
+    });
+
+    // =========================================================================
+    // MÓDULO 1: HORARIO & ESCÁNER OCR
+    // =========================================================================
+    function renderSchedule() {
+      const empty = document.getElementById('schedule-empty');
+      const wrap = document.getElementById('schedule-grid-wrapper');
+      const tbody = document.getElementById('schedule-table-body');
+      if (state.schedule.length === 0) {
+        empty.classList.remove('hidden');
+        wrap.classList.add('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+      wrap.classList.remove('hidden');
+      tbody.innerHTML = state.schedule.map((item, idx) => `
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
+          <td class="p-2.5 font-bold text-indigo-400">${item.day}</td>
+          <td class="p-2.5 whitespace-nowrap">${item.time}</td>
+          <td class="p-2.5 font-semibold">${item.subject}</td>
+          <td class="p-2.5 text-slate-400">${item.room || '—'}</td>
+          <td class="p-2.5 text-right whitespace-nowrap">
+            <button onclick="editClass(${idx})" class="text-indigo-400 mr-2 hover:underline">Editar</button>
+            <button onclick="deleteClass(${idx})" class="text-rose-400 font-bold hover:underline">×</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    window.editClass = idx => {
+      const c = state.schedule[idx];
+      document.getElementById('class-edit-index').value = idx;
+      document.getElementById('class-name').value = c.subject;
+      document.getElementById('class-day').value = c.day;
+      document.getElementById('class-time').value = c.time;
+      document.getElementById('class-room').value = c.room;
+      document.getElementById('class-modal').classList.remove('hidden');
+    };
+
+    window.deleteClass = idx => {
+      state.schedule.splice(idx, 1);
+      saveState();
+      renderSchedule();
+    };
+
+    document.getElementById('btn-add-class-modal').addEventListener('click', () => {
+      document.getElementById('class-edit-index').value = -1;
+      document.getElementById('class-form').reset();
+      document.getElementById('class-modal').classList.remove('hidden');
+    });
+
+    document.getElementById('close-class-modal').addEventListener('click', () => {
+      document.getElementById('class-modal').classList.add('hidden');
+    });
+
+    document.getElementById('class-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const idx = parseInt(document.getElementById('class-edit-index').value, 10);
+      const entry = {
+        subject: document.getElementById('class-name').value.trim(),
+        day: document.getElementById('class-day').value,
+        time: document.getElementById('class-time').value.trim(),
+        room: document.getElementById('class-room').value.trim()
+      };
+      if (idx >= 0) state.schedule[idx] = entry;
+      else state.schedule.push(entry);
+      saveState();
+      renderSchedule();
+      document.getElementById('class-modal').classList.add('hidden');
+    });
+
+    document.getElementById('schedule-file-input').addEventListener('change', async e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const statusBox = document.getElementById('ocr-status-box');
+      const statusText = document.getElementById('ocr-status-text');
+      const previewBox = document.getElementById('uploaded-doc-preview');
+      const previewImg = document.getElementById('doc-preview-img');
+      document.getElementById('doc-preview-name').textContent = file.name;
+      previewBox.classList.remove('hidden');
+      statusBox.classList.remove('hidden');
+
+      if (file.type.startsWith('image/')) {
+        const url = URL.createObjectURL(file);
+        previewImg.src = url;
+        previewImg.classList.remove('hidden');
+        try {
+          const res = await Tesseract.recognize(url, 'spa');
+          const lines = res.data.text.split('\n').map(l => l.trim()).filter(l => l.length > 3);
+          const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+          lines.slice(0, 8).forEach((line, i) => {
+            const matchedDay = days.find(d => line.toLowerCase().includes(d.toLowerCase())) || days[i % 5];
+            const timeMatch = line.match(/(\d{1,2}:\d{2}\s*-?\s*\d{0,2}:?\d{0,2})/);
+            state.schedule.push({
+              day: matchedDay,
+              time: timeMatch ? timeMatch[0] : 'Por definir',
+              subject: line.replace(timeMatch ? timeMatch[0] : '', '').trim() || line,
+              room: ''
+            });
+          });
+          saveState();
+          renderSchedule();
+        } catch (err) {
+          console.error(err);
+        }
+      }
+      statusText.textContent = 'Documento analizado. Puedes editar los detalles en la tabla.';
+      setTimeout(() => statusBox.classList.add('hidden'), 2500);
+    });
+
+    document.getElementById('close-doc-preview').addEventListener('click', () => {
+      document.getElementById('uploaded-doc-preview').classList.add('hidden');
+    });
+
+    // =========================================================================
+    // MÓDULO 2: NOTAS CON CORTES & SUB-ÍTEMS
+    // =========================================================================
+    document.getElementById('btn-new-subject').addEventListener('click', () => {
+      const name = prompt('Nombre de la asignatura:');
+      if (!name) return;
+      state.subjects.push({
+        name: name.trim(),
+        cuts: [
+          { name: 'Corte 1', weight: 30, items: [] },
+          { name: 'Corte 2', weight: 30, items: [] },
+          { name: 'Corte Final', weight: 40, items: [] }
+        ]
+      });
+      saveState();
+      renderSubjects();
+    });
+
+    function renderSubjects() {
+      const empty = document.getElementById('grades-empty');
+      const list = document.getElementById('subjects-list');
+      if (state.subjects.length === 0) {
+        empty.classList.remove('hidden');
+        list.innerHTML = '';
+        return;
+      }
+      empty.classList.add('hidden');
+      const passGrade = state.settings.scale === 100 ? 60 : 3.0;
+      const maxGrade = state.settings.scale === 100 ? 100 : 5.0;
+
+      list.innerHTML = state.subjects.map((sub, sIdx) => {
+        let earned = 0;
+        let evaluatedWeight = 0;
+        const cutsHtml = sub.cuts.map((cut, cIdx) => {
+          let cutAvg = 0;
+          let itemWeightSum = 0;
+          cut.items.forEach(it => {
+            cutAvg += (it.grade * (it.weight / 100));
+            itemWeightSum += it.weight;
+          });
+          if (itemWeightSum > 0) {
+            earned += cutAvg * (cut.weight / 100);
+            evaluatedWeight += cut.weight;
+          }
+          return `
+            <div class="p-2.5 rounded-xl bg-slate-100/70 dark:bg-brand-dark space-y-1.5">
+              <div class="flex justify-between items-center text-xs font-bold">
+                <span>${cut.name} (${cut.weight}%)</span>
+                <button onclick="addCutItem(${sIdx}, ${cIdx})" class="text-[11px] text-indigo-400 hover:underline">+ Ítem</button>
+              </div>
+              ${cut.items.map(it => `<div class="flex justify-between text-[11px] text-slate-400"><span>• ${it.name} (${it.weight}%)</span><span class="font-bold text-slate-200">${it.grade}</span></div>`).join('')}
+            </div>
+          `;
+        }).join('');
+
+        const remWeight = Math.max(0, 100 - evaluatedWeight);
+        const needed = remWeight > 0 ? ((passGrade - earned) / (remWeight / 100)).toFixed(2) : 0;
+        let badgeColor = 'bg-emerald-500/15 text-emerald-400';
+        let statusMsg = `Acumulado: ${earned.toFixed(2)}`;
+        if (remWeight > 0) {
+          if (needed > maxGrade) {
+            badgeColor = 'bg-rose-500/15 text-rose-400';
+            statusMsg = `Necesitas ${needed} (Crítico)`;
+          } else if (needed > passGrade) {
+            badgeColor = 'bg-amber-500/15 text-amber-400';
+            statusMsg = `Remontable: necesitas ${needed}`;
+          } else {
+            statusMsg = `Vas bien: necesitas ${Math.max(0, needed)}`;
+          }
+        }
+
+        return `
+          <div class="p-4 rounded-2xl bg-slate-50 dark:bg-brand-card border border-slate-200 dark:border-slate-800 space-y-3">
+            <div class="flex justify-between items-center">
+              <h4 class="font-extrabold text-sm">${sub.name}</h4>
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${badgeColor}">${statusMsg}</span>
+            </div>
+            <div class="space-y-2">${cutsHtml}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.addCutItem = (sIdx, cIdx) => {
+      const name = prompt('Nombre de la evaluación (ej. Parcial, Taller, Quiz):');
+      if (!name) return;
+      const weight = parseFloat(prompt('Porcentaje dentro del corte (ej. 50):') || '0');
+      const grade = parseFloat(prompt('Nota obtenida:') || '0');
+      state.subjects[sIdx].cuts[cIdx].items.push({ name, weight, grade });
+      saveState();
+      renderSubjects();
+    };
+
+    // =========================================================================
+    // MÓDULO 3: PRESUPUESTO & GASTOS
+    // =========================================================================
+    document.getElementById('btn-set-budget').addEventListener('click', () => {
+      const val = parseFloat(prompt('Ingresa tu presupuesto general disponible:') || '0');
+      if (val >= 0) {
+        state.budget.total = val;
+        saveState();
+        renderBudget();
+      }
+    });
+
+    document.getElementById('btn-add-envelope').addEventListener('click', () => {
+      const name = prompt('Nombre del sobre (ej. Pasajes, Comida):');
+      if (!name) return;
+      const limit = parseFloat(prompt('Monto asignado a este sobre:') || '0');
+      state.budget.envelopes.push({ name, limit });
+      saveState();
+      renderBudget();
+    });
+
+    document.getElementById('btn-add-expense').addEventListener('click', () => {
+      const desc = prompt('Descripción del gasto:');
+      if (!desc) return;
+      const amount = parseFloat(prompt('Valor del gasto:') || '0');
+      const category = prompt('Categoría / Sobre:') || 'General';
+      state.budget.expenses.unshift({ desc, amount, category, date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+      saveState();
+      renderBudget();
+    });
+
+    function renderBudget() {
+      const spent = state.budget.expenses.reduce((acc, e) => acc + e.amount, 0);
+      const rem = state.budget.total - spent;
+      document.getElementById('budget-remaining').textContent = `$${rem.toLocaleString()}`;
+      document.getElementById('budget-total-badge').textContent = `Total: $${state.budget.total.toLocaleString()}`;
+      const pct = state.budget.total > 0 ? Math.min(100, (spent / state.budget.total) * 100) : 0;
+      document.getElementById('budget-progress-bar').style.width = `${pct}%`;
+
+      document.getElementById('envelopes-list').innerHTML = state.budget.envelopes.map(env => {
+        const envSpent = state.budget.expenses.filter(e => e.category.toLowerCase() === env.name.toLowerCase()).reduce((a, b) => a + b.amount, 0);
+        return `
+          <div class="p-3 rounded-2xl bg-slate-50 dark:bg-brand-card border border-slate-200 dark:border-slate-800">
+            <p class="text-xs font-bold">${env.name}</p>
+            <p class="text-sm font-extrabold text-indigo-400 mt-1">$${(env.limit - envSpent).toLocaleString()}</p>
+            <p class="text-[10px] text-slate-400">de $${env.limit.toLocaleString()}</p>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('expenses-list').innerHTML = state.budget.expenses.map(ex => `
+        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-brand-card border border-slate-200 dark:border-slate-800 flex justify-between items-center text-xs">
+          <div>
+            <p class="font-bold">${ex.desc}</p>
+            <p class="text-[10px] text-slate-400">${ex.category} • ${ex.date}</p>
+          </div>
+          <span class="font-bold text-rose-400">-$${ex.amount.toLocaleString()}</span>
+        </div>
+      `).join('');
+    }
+
+    // =========================================================================
+    // MÓDULO 4: SALA GRUPAL GLOBAL POR ID
+    // =========================================================================
+    document.getElementById('btn-generate-room').addEventListener('click', () => {
+      document.getElementById('room-id-input').value = 'SS-' + Math.floor(1000 + Math.random() * 9000);
+    });
+
+    document.getElementById('btn-join-room').addEventListener('click', () => {
+      const id = document.getElementById('room-id-input').value.trim().toUpperCase();
+      if (!id) return;
+      state.room.id = id;
+      document.getElementById('group-lobby').classList.add('hidden');
+      document.getElementById('group-active-room').classList.remove('hidden');
+      document.getElementById('active-room-title').textContent = `Sala: ${id}`;
+      renderMessages();
+    });
+
+    document.getElementById('btn-leave-room').addEventListener('click', () => {
+      document.getElementById('group-active-room').classList.add('hidden');
+      document.getElementById('group-lobby').classList.remove('hidden');
+    });
+
+    let voiceOn = false;
+    document.getElementById('btn-toggle-voice').addEventListener('click', () => {
+      voiceOn = !voiceOn;
+      document.getElementById('voice-status-label').textContent = voiceOn ? 'Hablando' : 'Voz Off';
+    });
+
+    document.getElementById('room-chat-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const input = document.getElementById('room-msg-input');
+      if (!input.value.trim()) return;
+      state.room.messages.push({
+        sender: state.profile.name,
+        text: input.value.trim(),
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+      input.value = '';
+      saveState();
+      renderMessages();
+    });
+
+    document.getElementById('room-file-input').addEventListener('change', e => {
+      const f = e.target.files[0];
+      if (!f) return;
+      state.room.messages.push({
+        sender: state.profile.name,
+        text: `📎 Compartió archivo: ${f.name}`,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+      saveState();
+      renderMessages();
+    });
+
+    function renderMessages() {
+      const box = document.getElementById('room-messages');
+      box.innerHTML = state.room.messages.map(m => `
+        <div class="p-2.5 rounded-xl bg-white dark:bg-brand-dark text-xs">
+          <div class="flex justify-between text-[10px] text-indigo-400 font-bold mb-0.5">
+            <span>${m.sender}</span><span>${m.time}</span>
+          </div>
+          <p>${m.text}</p>
+        </div>
+      `).join('');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    // =========================================================================
+    // MODAL PERFIL, AJUSTES Y LEGAL
+    // =========================================================================
+    function openSettings(tab = 'profile') {
+      document.getElementById('settings-modal').classList.remove('hidden');
+      document.getElementById('edit-name').value = state.profile.name;
+      document.getElementById('edit-inst').value = state.profile.institution;
+      document.getElementById('edit-career').value = state.profile.career;
+      document.getElementById('edit-semester').value = state.profile.semester;
+      renderAvatar(document.getElementById('edit-avatar-preview'), state.profile);
+      switchModalTab(tab);
+    }
+
+    function switchModalTab(tab) {
+      ['profile', 'prefs', 'legal'].forEach(t => {
+        document.getElementById(`modal-pane-${t}`).classList.toggle('hidden', t !== tab);
+      });
+      document.querySelectorAll('.modal-tab-btn').forEach(b => {
+        const active = b.dataset.modalTab === tab;
+        b.classList.toggle('bg-indigo-600', active);
+        b.classList.toggle('text-white', active);
+        b.classList.toggle('text-slate-400', !active);
+      });
+    }
+
+    document.getElementById('open-settings-btn').addEventListener('click', () => openSettings('prefs'));
+    document.getElementById('open-profile-btn').addEventListener('click', () => openSettings('profile'));
+    document.getElementById('close-settings-modal').addEventListener('click', () => document.getElementById('settings-modal').classList.add('hidden'));
+    document.querySelectorAll('.modal-tab-btn').forEach(b => b.addEventListener('click', () => switchModalTab(b.dataset.modalTab)));
+
+    document.getElementById('edit-photo-input').addEventListener('change', e => {
+      const f = e.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = ev => {
+        state.profile.photo = ev.target.result;
+        renderAvatar(document.getElementById('edit-avatar-preview'), state.profile);
+      };
+      r.readAsDataURL(f);
+    });
+
+    document.getElementById('save-profile-btn').addEventListener('click', () => {
+      state.profile.name = document.getElementById('edit-name').value.trim();
+      state.profile.institution = document.getElementById('edit-inst').value.trim();
+      state.profile.career = document.getElementById('edit-career').value.trim();
+      state.profile.semester = document.getElementById('edit-semester').value.trim();
+      saveState();
+      bootApp();
+      document.getElementById('settings-modal').classList.add('hidden');
+    });
+
+    document.getElementById('toggle-dark-mode').addEventListener('change', e => {
+      document.documentElement.classList.toggle('dark', e.target.checked);
+    });
+
+    document.getElementById('grade-scale-select').addEventListener('change', e => {
+      state.settings.scale = parseInt(e.target.value, 10);
+      saveState();
+      renderSubjects();
+    });
+
+    document.getElementById('btn-export-json').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'super-studio-respaldo.json';
+      a.click();
+    });
+
+    document.getElementById('btn-reset-app').addEventListener('click', () => {
+      if (confirm('¿Seguro que deseas borrar todos los datos y reiniciar Super Studio?')) {
+        localStorage.removeItem(STATE_KEY);
+        location.reload();
+      }
+    });
+
+    // Boot
+    lucide.createIcons();
+    if (state.profile) bootApp();
+  </script>
+</body>
+</html>
